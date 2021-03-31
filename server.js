@@ -10,17 +10,11 @@ const runner = require("./test-runner");
 const mongo = require("mongodb");
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
 mongoose.connect(process.env.DB, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
-const issueSchema = new Schema({
-  issue_title: { type: String, required: true },
-  issue_text: { type: String, required: true },
-  created_by: { type: String, required: true }
-});
-const Issue = mongoose.model("issues", issueSchema);
+
 // const findData = async () => {
 //   const myData = await Issue.find();
 //   console.log('data isssss', myData)
@@ -65,7 +59,7 @@ app.route("/").get(function(req, res) {
 //For FCC testing purposes
 fccTestingRoutes(app);
 //Routing for API
-apiRoutes(app);
+app.use(apiRoutes);
 //404 Not Found Middleware
 app.use(function(req, res, next) {
   res
