@@ -14,12 +14,6 @@ mongoose.connect(process.env.DB, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
-
-// const findData = async () => {
-//   const myData = await Issue.find();
-//   console.log('data isssss', myData)
-// }
-// findData()
 const db = mongoose.connection;
 db.once("open", () => {
   console.log("Cameron's app has connected to MongoDB.");
@@ -27,28 +21,12 @@ db.once("open", () => {
 db.on("error", err => {
   console.log(err);
 });
-// const createAndSaveIssue = () => {
-//   const issueToBeCreated = new Issue({
-//     issue_title: "example title???",
-//     issue_text: "example issueess texttt",
-//     created_by: "joee lou"
-//   });
-//   issueToBeCreated.save((err, data) => {
-//     if (err) {
-//       return console.error(err);
-//     } else {
-//       console.log("an issue was created in the DB");
-//     }
-//   });
-// };
-// createAndSaveIssue();
-
 let app = express();
 app.use("/public", express.static(process.cwd() + "/public"));
 app.use(cors({ origin: "*" })); //For FCC testing purposes only
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-//Sample front-end
+// Sample front-end
 app.route("/:project/").get(function(req, res) {
   res.sendFile(process.cwd() + "/views/issue.html");
 });
@@ -59,7 +37,7 @@ app.route("/").get(function(req, res) {
 //For FCC testing purposes
 fccTestingRoutes(app);
 //Routing for API
-app.use(apiRoutes);
+app.use("/api", apiRoutes);
 //404 Not Found Middleware
 app.use(function(req, res, next) {
   res
