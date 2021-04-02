@@ -31,7 +31,10 @@ const issueController = {
     console.log("edittt");
   },
   deleteIssue: (req, res) => {
-    console.log("deleteee");
+    const { _id } = req.body;
+    Issue.findByIdAndRemove(_id, err => {
+      if (err) return console.log(err);
+    });
   }
 };
 module.exports = issueController;
