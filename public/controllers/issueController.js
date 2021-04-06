@@ -26,6 +26,8 @@ const issueController = {
       if (err) {
         return console.error(err);
       } else {
+        console.log("data", data);
+        res.json(data);
         console.log("an issue was created in the DB");
       }
     });
@@ -55,12 +57,14 @@ const issueController = {
 
     Issue.findOneAndUpdate(_id, filteredParams, { new: true }, err => {
       if (err) return console.log(err);
+      res.json({ result: "successfully updated", _id });
     });
   },
   deleteIssue: (req, res) => {
     const { _id } = req.body;
     Issue.findByIdAndRemove(_id, err => {
       if (err) return console.log(err);
+      res.json({ result: "successfully deleted", _id });
     });
   }
 };
