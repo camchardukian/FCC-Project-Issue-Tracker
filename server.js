@@ -21,6 +21,7 @@ db.once("open", () => {
 db.on("error", err => {
   console.log(err);
 });
+mongoose.set("useFindAndModify", false);
 let app = express();
 app.use("/public", express.static(process.cwd() + "/public"));
 app.use(cors({ origin: "*" })); //For FCC testing purposes only
