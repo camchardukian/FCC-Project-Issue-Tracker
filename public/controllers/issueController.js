@@ -3,7 +3,29 @@ const Helper = require("../utils/helpers");
 
 const issueController = {
   viewIssues: async (req, res) => {
-    const issueList = await Issue.find();
+    const {
+      open,
+      _id,
+      issue_title,
+      issue_text,
+      created_by,
+      assigned_to,
+      status_text
+    } = req.query;
+
+    const params = {
+      open,
+      _id,
+      issue_title,
+      issue_text,
+      created_by,
+      assigned_to,
+      status_text
+    };
+    const filteredParams = Helper.removeUndefinedAndEmptyStringValuesFromObj(
+      params
+    );
+    const issueList = await Issue.find(filteredParams);
     res.send(issueList);
   },
   createIssue: (req, res) => {
@@ -51,7 +73,7 @@ const issueController = {
       status_text,
       open
     };
-    const filteredParams = Helper.removeUndefinedAndEmptyStringValuesFromObj(
+    const filteredParams = Helper.Helper.removeUndefinedAndEmptyStringValuesFromObj(
       params
     );
 
