@@ -1,6 +1,5 @@
 const Issue = require("../models/issueModel");
 const Helper = require("../utils/helpers");
-
 const issueController = {
   viewIssues: async (req, res) => {
     const {
@@ -12,7 +11,6 @@ const issueController = {
       assigned_to,
       status_text
     } = req.query;
-
     const params = {
       open,
       _id,
@@ -48,7 +46,6 @@ const issueController = {
       if (err) {
         return console.error(err);
       } else {
-        console.log("data", data);
         res.json(data);
         console.log("an issue was created in the DB");
       }
@@ -64,7 +61,6 @@ const issueController = {
       status_text,
       open = undefined
     } = req.body;
-
     const params = {
       issue_title,
       issue_text,
@@ -73,11 +69,10 @@ const issueController = {
       status_text,
       open
     };
-    const filteredParams = Helper.Helper.removeUndefinedAndEmptyStringValuesFromObj(
+    const filteredParams = Helper.removeUndefinedAndEmptyStringValuesFromObj(
       params
     );
-
-    Issue.findOneAndUpdate(_id, filteredParams, { new: true }, err => {
+    Issue.findOneAndUpdate({ _id }, { ...filteredParams }, err => {
       if (err) return console.log(err);
       res.json({ result: "successfully updated", _id });
     });
