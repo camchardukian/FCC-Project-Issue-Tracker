@@ -34,6 +34,12 @@ const issueController = {
       assigned_to = "",
       status_text = ""
     } = req.body;
+
+    if (!issue_title || !issue_text || !created_by) {
+      console.log("beforeee");
+      return res.json({ error: "required field(s) missing" });
+    }
+    console.log("rannnn");
     const issueToBeCreated = new Issue({
       issue_title,
       issue_text,
@@ -42,6 +48,7 @@ const issueController = {
       status_text,
       open: true
     });
+
     issueToBeCreated.save((err, data) => {
       if (err) {
         return console.error(err);
