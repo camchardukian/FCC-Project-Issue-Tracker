@@ -68,4 +68,70 @@ suite("Functional Tests", function() {
         }
       });
   });
+
+  test("View issues on a project: GET request to /api/issues/apitest", done => {
+    chai
+      .request(server)
+      .get("/api/issues/apitest")
+      .end((err, res) => {
+        assert.typeOf(
+          res.body,
+          "array",
+          "A plain GET request to /api/issues/apitest returns an array"
+        );
+        assert.equal(res.status, 200);
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
+  });
+
+  test("View issues on a project with one filter: GET request to /api/issues/apitest", done => {
+    chai
+      .request(server)
+      .get("/api/issues/apitest")
+      .query({ open: false })
+      .end((err, res) => {
+        assert.typeOf(
+          res.body,
+          "array",
+          "A GET request with a single filter to /api/issues/apitest returns an array"
+        );
+        assert.equal(res.status, 200);
+        for (let i = 0; i < res.body.length; i += 1) {
+          assert.equal(res["body"][i]["open"], false);
+        }
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
+  });
+
+  test("View issues on a project with multiple filters: GET request to /api/issues/apitest", done => {
+    chai
+      .request(server)
+      .get("/api/issues/apitest")
+      .query({ open: false, _id: "606d928da76c980d6660a24b" })
+      .end((err, res) => {
+        assert.typeOf(
+          res.body,
+          "array",
+          "A GET request with multiple filters to /api/issues/apitest returns an array"
+        );
+        assert.equal(res.status, 200);
+        for (let i = 0; i < res.body.length; i += 1) {
+          assert.equal(res["body"][i]["open"], false);
+          assert.equal(res["body"][i]["_id"], "606d928da76c980d6660a24b");
+        }
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
+  });
 });
