@@ -36,10 +36,8 @@ const issueController = {
     } = req.body;
 
     if (!issue_title || !issue_text || !created_by) {
-      console.log("beforeee");
       return res.json({ error: "required field(s) missing" });
     }
-    console.log("rannnn");
     const issueToBeCreated = new Issue({
       issue_title,
       issue_text,
