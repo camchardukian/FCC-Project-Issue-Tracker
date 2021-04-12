@@ -34,7 +34,6 @@ const issueController = {
       assigned_to = "",
       status_text = ""
     } = req.body;
-
     if (!issue_title || !issue_text || !created_by) {
       return res.json({ error: "required field(s) missing" });
     }
@@ -46,7 +45,6 @@ const issueController = {
       status_text,
       open: true
     });
-
     issueToBeCreated.save((err, data) => {
       if (err) {
         return console.error(err);
@@ -56,7 +54,7 @@ const issueController = {
       }
     });
   },
-  editIssue: (req, res) => {
+  editIssue: async (req, res) => {
     const {
       _id,
       issue_title,
@@ -66,6 +64,14 @@ const issueController = {
       status_text,
       open = undefined
     } = req.body;
+    if (!_id) {
+      return res.json({ error: "missing _id" });
+    } else {
+      const issue = await Issue.findById(_id);
+      if (!issue) {
+        return res.json({ error: "could not update", _id: _id });
+      }
+    }
     const params = {
       issue_title,
       issue_text,
@@ -77,6 +83,9 @@ const issueController = {
     const filteredParams = Helper.removeUndefinedAndEmptyStringValuesFromObj(
       params
     );
+    if (Helper.checkIsEmptyObject(filteredParams)) {
+      return res.json({ error: "no update field(s) sent", _id: _id });
+    }
     Issue.findOneAndUpdate({ _id }, { ...filteredParams }, err => {
       if (err) return console.log(err);
       res.json({ result: "successfully updated", _id });
