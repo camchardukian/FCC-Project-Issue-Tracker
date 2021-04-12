@@ -2,9 +2,7 @@ const chaiHttp = require("chai-http");
 const chai = require("chai");
 const assert = chai.assert;
 const server = require("../server");
-
 chai.use(chaiHttp);
-
 suite("Functional Tests", function() {
   test("Create an issue with every field: POST request to /api/issues/apitest", done => {
     chai
@@ -28,7 +26,6 @@ suite("Functional Tests", function() {
         }
       });
   });
-
   test("Create an issue with only required fields: POST request to /api/issues/apitest", done => {
     chai
       .request(server)
@@ -48,7 +45,6 @@ suite("Functional Tests", function() {
         }
       });
   });
-
   test("Create an issue with missing required fields: POST request to /api/issues/apitest", done => {
     chai
       .request(server)
@@ -68,7 +64,6 @@ suite("Functional Tests", function() {
         }
       });
   });
-
   test("View issues on a project: GET request to /api/issues/apitest", done => {
     chai
       .request(server)
@@ -87,7 +82,6 @@ suite("Functional Tests", function() {
         }
       });
   });
-
   test("View issues on a project with one filter: GET request to /api/issues/apitest", done => {
     chai
       .request(server)
@@ -110,7 +104,6 @@ suite("Functional Tests", function() {
         }
       });
   });
-
   test("View issues on a project with multiple filters: GET request to /api/issues/apitest", done => {
     chai
       .request(server)
@@ -127,6 +120,108 @@ suite("Functional Tests", function() {
           assert.equal(res["body"][i]["open"], false);
           assert.equal(res["body"][i]["_id"], "606d928da76c980d6660a24b");
         }
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
+  });
+  test("Update one field on an issue: PUT request to /api/issues/apitest", done => {
+    chai
+      .request(server)
+      .put("/api/issues/apitest")
+      .send({
+        issue_title: "I was edited via the testttttttttt",
+        _id: "606d9298a76c980d6660a24c"
+      })
+      .end((err, res) => {
+        assert.equal(res.status, 200);
+        assert.deepEqual(res.body, {
+          result: "successfully updated",
+          _id: "606d9298a76c980d6660a24c"
+        });
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
+  });
+  test("Update multiple fields on an issue: PUT request to /api/issues/apitest", done => {
+    chai
+      .request(server)
+      .put("/api/issues/apitest")
+      .send({
+        issue_title:
+          "A title of an issue with multiple fields that were updated.",
+        open: false,
+        _id: "606d9298a76c980d6660a24c"
+      })
+      .end((err, res) => {
+        assert.equal(res.status, 200);
+        assert.deepEqual(res.body, {
+          result: "successfully updated",
+          _id: "606d9298a76c980d6660a24c"
+        });
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
+  });
+  test("Update an issue with missing _id: PUT request to /api/issues/apitest", done => {
+    chai
+      .request(server)
+      .put("/api/issues/apitest")
+      .send({
+        issue_title: "Title but no _id"
+      })
+      .end((err, res) => {
+        assert.equal(res.status, 200);
+        assert.deepEqual(res.body, { error: "missing _id" });
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
+  });
+  test("Update an issue with no fields to update: PUT request to /api/issues/apitest", done => {
+    chai
+      .request(server)
+      .put("/api/issues/apitest")
+      .send({
+        _id: "606d9298a76c980d6660a24c"
+      })
+      .end((err, res) => {
+        assert.equal(res.status, 200);
+        assert.deepEqual(res.body, {
+          error: "no update field(s) sent",
+          _id: "606d9298a76c980d6660a24c"
+        });
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
+  });
+  test("Update an issue with an invalid _id: PUT request to /api/issues/apitest", done => {
+    chai
+      .request(server)
+      .put("/api/issues/apitest")
+      .send({
+        issue_title: "This title should never exist",
+        _id: "606d928da76c980d6660a24b"
+      })
+      .end((err, res) => {
+        assert.equal(res.status, 200);
+        assert.deepEqual(res.body, {
+          error: "could not update",
+          _id: "606d928da76c980d6660a24b"
+        });
         if (err) {
           done(err);
         } else {
