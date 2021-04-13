@@ -91,10 +91,17 @@ const issueController = {
       res.json({ result: "successfully updated", _id });
     });
   },
-  deleteIssue: (req, res) => {
+  deleteIssue: async (req, res) => {
     const { _id } = req.body;
+    if (!_id) {
+      return res.json({ error: "missing _id" });
+    }
+    const isIssueInDatabase = await Issue.findById(_id).exec();
+    if (!isIssueInDatabase) {
+      return res.json({ error: "could not delete", _id: _id });
+    }
     Issue.findByIdAndRemove(_id, err => {
-      if (err) return console.log(err);
+      if (err) return res.json({ error: "could not delete", _id: _id });
       res.json({ result: "successfully deleted", _id });
     });
   }

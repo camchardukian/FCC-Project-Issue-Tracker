@@ -2,7 +2,10 @@ const chaiHttp = require("chai-http");
 const chai = require("chai");
 const assert = chai.assert;
 const server = require("../server");
+
 chai.use(chaiHttp);
+let idToBeDeleted;
+
 suite("Functional Tests", function() {
   test("Create an issue with every field: POST request to /api/issues/apitest", done => {
     chai
@@ -19,6 +22,7 @@ suite("Functional Tests", function() {
       })
       .end((err, res) => {
         assert.equal(res.status, 200);
+        idToBeDeleted = res["body"]["_id"];
         if (err) {
           done(err);
         } else {
@@ -221,6 +225,62 @@ suite("Functional Tests", function() {
         assert.deepEqual(res.body, {
           error: "could not update",
           _id: "606d928da76c980d6660a24b"
+        });
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
+  });
+
+  test("Delete an issue: DELETE request to /api/issues/apitest", done => {
+    chai
+      .request(server)
+      .delete("/api/issues/apitest")
+      .send({
+        _id: idToBeDeleted
+      })
+      .end((err, res) => {
+        assert.equal(res.status, 200);
+        assert.deepEqual(res.body, {
+          result: "successfully deleted",
+          _id: idToBeDeleted
+        });
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
+  });
+  test("Delete an issue with missing _id: DELETE request to /api/issues/apitest", done => {
+    chai
+      .request(server)
+      .delete("/api/issues/apitest")
+      .send({})
+      .end((err, res) => {
+        assert.equal(res.status, 200);
+        assert.deepEqual(res.body, { error: "missing _id" });
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
+  });
+  test("Delete an issue with an invalid _id: DELETE request to /api/issues/apitest", done => {
+    chai
+      .request(server)
+      .delete("/api/issues/apitest")
+      .send({
+        _id: "606ed76058107a34be088888"
+      })
+      .end((err, res) => {
+        assert.equal(res.status, 200);
+        assert.deepEqual(res.body, {
+          error: "could not delete",
+          _id: "606ed76058107a34be088888"
         });
         if (err) {
           done(err);
