@@ -2,9 +2,9 @@
 const issueController = require("../public/controllers/issueController");
 const router = require("express").Router();
 
-router.get("/issues/apitest", issueController.viewIssues);
-router.post("/issues/apitest", issueController.createIssue);
-router.put("/issues/apitest", issueController.editIssue);
-router.delete("/issues/apitest", issueController.deleteIssue);
+router.get("/issues/:project", issueController.viewIssues);
+router.post("/issues/:project", issueController.createIssue);
+router.put("/issues/:project", issueController.editIssue);
+router.delete("/issues/:project", issueController.deleteIssue);
 
 module.exports = router;
