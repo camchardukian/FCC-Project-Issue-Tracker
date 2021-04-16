@@ -1,4 +1,5 @@
-const Issue = require("../models/issueModel");
+const Issue = require("../models/models").Issue;
+const Project = require("../models/models").Project;
 const Helper = require("../utils/helpers");
 const issueController = {
   viewIssues: async (req, res) => {
@@ -11,6 +12,7 @@ const issueController = {
       assigned_to,
       status_text
     } = req.query;
+    const projectName = req.params.project;
     const params = {
       open,
       _id,
@@ -18,13 +20,18 @@ const issueController = {
       issue_text,
       created_by,
       assigned_to,
-      status_text
+      status_text,
+      projectName
     };
     const filteredParams = Helper.removeUndefinedAndEmptyStringValuesFromObj(
       params
     );
-    const issueList = await Issue.find(filteredParams);
-    res.send(issueList);
+    let issueList = await Project.find(filteredParams);
+    if (Array.isArray(issueList) && issueList.length) {
+      res.send(issueList[0]["issues"]);
+    } else {
+      res.send([]);
+    }
   },
   createIssue: (req, res) => {
     const {
@@ -34,10 +41,11 @@ const issueController = {
       assigned_to = "",
       status_text = ""
     } = req.body;
+    const projectName = req.params.project;
     if (!issue_title || !issue_text || !created_by) {
       return res.json({ error: "required field(s) missing" });
     }
-    const issueToBeCreated = new Issue({
+    const issueToBeAdded = new Issue({
       issue_title,
       issue_text,
       created_by,
@@ -45,16 +53,32 @@ const issueController = {
       status_text,
       open: true
     });
-    issueToBeCreated.save((err, data) => {
-      if (err) {
-        return console.error(err);
+    Project.find({ projectName }, (err, docs) => {
+      if (!docs.length) {
+        const projectToBeCreated = new Project({
+          projectName
+        });
+        projectToBeCreated.issues.push(issueToBeAdded);
+        projectToBeCreated.save((err, data) => {
+          if (err) {
+            return console.error(err);
+          } else {
+            res.json(data);
+          }
+        });
       } else {
-        res.json(data);
-        console.log("an issue was created in the DB");
+        docs[0]["issues"].push(issueToBeAdded);
+        docs[0].save((err, data) => {
+          if (err) {
+            res.send("An error occured while creating the issue");
+          } else {
+            res.json(issueToBeAdded);
+          }
+        });
       }
     });
   },
-  editIssue: async (req, res) => {
+  editIssue: (req, res) => {
     const {
       _id,
       issue_title,
@@ -64,14 +88,6 @@ const issueController = {
       status_text,
       open = undefined
     } = req.body;
-    if (!_id) {
-      return res.json({ error: "missing _id" });
-    } else {
-      const issue = await Issue.findById(_id);
-      if (!issue) {
-        return res.json({ error: "could not update", _id: _id });
-      }
-    }
     const params = {
       issue_title,
       issue_text,
@@ -83,26 +99,62 @@ const issueController = {
     const filteredParams = Helper.removeUndefinedAndEmptyStringValuesFromObj(
       params
     );
-    if (Helper.checkIsEmptyObject(filteredParams)) {
+    let projectName = req.params.project;
+    if (!_id) {
+      return res.json({ error: "missing _id" });
+    } else if (Helper.checkIsEmptyObject(filteredParams)) {
       return res.json({ error: "no update field(s) sent", _id: _id });
+    } else {
+      Project.findOne({ projectName }, (err, docs) => {
+        if (err || !docs) {
+          return res.json({ error: "could not update", _id: _id });
+        }
+        const issueToBeUpdated = docs.issues.id(_id);
+        if (!issueToBeUpdated) {
+          return res.json({ error: "could not update", _id: _id });
+        }
+        issueToBeUpdated.issue_title =
+          issue_title || issueToBeUpdated.issue_title;
+        issueToBeUpdated.issue_text = issue_text || issueToBeUpdated.issue_text;
+        issueToBeUpdated.created_by = created_by || issueToBeUpdated.created_by;
+        issueToBeUpdated.assigned_to =
+          assigned_to || issueToBeUpdated.assigned_to;
+        issueToBeUpdated.status_text =
+          status_text || issueToBeUpdated.status_text;
+        issueToBeUpdated.open = open || issueToBeUpdated.open;
+        docs.save((err, data) => {
+          if (err || !data) {
+            return res.json({ error: "could not update", _id: _id });
+          } else {
+            return res.json({ result: "successfully updated", _id: _id });
+          }
+        });
+      });
     }
-    Issue.findOneAndUpdate({ _id }, { ...filteredParams }, err => {
-      if (err) return console.log(err);
-      res.json({ result: "successfully updated", _id });
-    });
   },
   deleteIssue: async (req, res) => {
     const { _id } = req.body;
+    const projectName = req.params.project;
     if (!_id) {
       return res.json({ error: "missing _id" });
     }
-    const isIssueInDatabase = await Issue.findById(_id).exec();
-    if (!isIssueInDatabase) {
-      return res.json({ error: "could not delete", _id: _id });
-    }
-    Issue.findByIdAndRemove(_id, err => {
-      if (err) return res.json({ error: "could not delete", _id: _id });
-      res.json({ result: "successfully deleted", _id });
+    Project.findOne({ projectName }, (err, docs) => {
+      const projectHasSelectedIssue = docs.issues.filter(
+        obj => obj["_id"].toString() === _id
+      ).length;
+      if (err || !projectHasSelectedIssue) {
+        return res.json({ error: "could not delete", _id: _id });
+      }
+      const updatedListOfIssues = docs.issues.filter(
+        obj => obj["_id"].toString() !== _id
+      );
+      docs.issues = updatedListOfIssues;
+      docs.save((err, data) => {
+        if (err) {
+          return res.json({ error: "could not delete", _id });
+        }
+        res.json({ result: "successfully deleted", _id });
+      });
     });
   }
 };

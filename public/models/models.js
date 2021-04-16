@@ -11,4 +11,9 @@ const issueSchema = new Schema(
   },
   { timestamps: { createdAt: "created_on", updatedAt: "updated_on" } }
 );
-module.exports = mongoose.model("issues", issueSchema);
+const projectSchema = new Schema({
+  projectName: { type: String, required: true },
+  issues: [issueSchema]
+});
+module.exports.Issue = mongoose.model("issues", issueSchema);
+module.exports.Project = mongoose.model("project", projectSchema);
