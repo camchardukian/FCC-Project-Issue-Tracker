@@ -2,10 +2,8 @@ const chaiHttp = require("chai-http");
 const chai = require("chai");
 const assert = chai.assert;
 const server = require("../server");
-
 chai.use(chaiHttp);
-let idToBeDeleted;
-
+let idToBeEditedAndDeleted;
 suite("Functional Tests", function() {
   test("Create an issue with every field: POST request to /api/issues/{project}", done => {
     chai
@@ -22,7 +20,7 @@ suite("Functional Tests", function() {
       })
       .end((err, res) => {
         assert.equal(res.status, 200);
-        idToBeDeleted = res["body"]["_id"];
+        idToBeEditedAndDeleted = res["body"]["_id"];
         if (err) {
           done(err);
         } else {
@@ -137,13 +135,13 @@ suite("Functional Tests", function() {
       .put("/api/issues/apitest")
       .send({
         issue_title: "I was edited via the testttttttttt",
-        _id: "606d9298a76c980d6660a24c"
+        _id: idToBeEditedAndDeleted
       })
       .end((err, res) => {
         assert.equal(res.status, 200);
         assert.deepEqual(res.body, {
           result: "successfully updated",
-          _id: "606d9298a76c980d6660a24c"
+          _id: idToBeEditedAndDeleted
         });
         if (err) {
           done(err);
@@ -160,13 +158,13 @@ suite("Functional Tests", function() {
         issue_title:
           "A title of an issue with multiple fields that were updated.",
         open: false,
-        _id: "606d9298a76c980d6660a24c"
+        _id: idToBeEditedAndDeleted
       })
       .end((err, res) => {
         assert.equal(res.status, 200);
         assert.deepEqual(res.body, {
           result: "successfully updated",
-          _id: "606d9298a76c980d6660a24c"
+          _id: idToBeEditedAndDeleted
         });
         if (err) {
           done(err);
@@ -233,19 +231,18 @@ suite("Functional Tests", function() {
         }
       });
   });
-
   test("Delete an issue: DELETE request to /api/issues/{project}", done => {
     chai
       .request(server)
       .delete("/api/issues/apitest")
       .send({
-        _id: idToBeDeleted
+        _id: idToBeEditedAndDeleted
       })
       .end((err, res) => {
         assert.equal(res.status, 200);
         assert.deepEqual(res.body, {
           result: "successfully deleted",
-          _id: idToBeDeleted
+          _id: idToBeEditedAndDeleted
         });
         if (err) {
           done(err);

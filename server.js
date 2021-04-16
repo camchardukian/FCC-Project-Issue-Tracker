@@ -8,7 +8,6 @@ const apiRoutes = require("./routes/api.js");
 const fccTestingRoutes = require("./routes/fcctesting.js");
 const runner = require("./test-runner");
 const mongo = require("mongodb");
-const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 mongoose.connect(process.env.DB, {
   useNewUrlParser: true,
