@@ -110,7 +110,7 @@ suite("Functional Tests", function() {
     chai
       .request(server)
       .get("/api/issues/apitest")
-      .query({ open: false, _id: "606d928da76c980d6660a24b" })
+      .query({ open: false, _id: idToBeEditedAndDeleted })
       .end((err, res) => {
         assert.typeOf(
           res.body,
@@ -120,7 +120,7 @@ suite("Functional Tests", function() {
         assert.equal(res.status, 200);
         for (let i = 0; i < res.body.length; i += 1) {
           assert.equal(res["body"][i]["open"], false);
-          assert.equal(res["body"][i]["_id"], "606d928da76c980d6660a24b");
+          assert.equal(res["body"][i]["_id"], idToBeEditedAndDeleted);
         }
         if (err) {
           done(err);

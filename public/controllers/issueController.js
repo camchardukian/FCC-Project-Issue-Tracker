@@ -20,18 +20,36 @@ const issueController = {
       issue_text,
       created_by,
       assigned_to,
-      status_text,
-      projectName
+      status_text
     };
+    if (typeof params.open === "string") {
+      params.open = Helper.convertStringToBoolean(open);
+    }
     const filteredParams = Helper.removeUndefinedAndEmptyStringValuesFromObj(
       params
     );
-    let issueList = await Project.find(filteredParams);
-    if (Array.isArray(issueList) && issueList.length) {
-      res.send(issueList[0]["issues"]);
-    } else {
-      res.send([]);
-    }
+    await Project.findOne({ projectName }, (err, docs) => {
+      const issueDocs = docs.issues;
+      if (!Object.keys(filteredParams).length) {
+        if (Array.isArray(issueDocs) && issueDocs.length) {
+          return res.send(issueDocs);
+        }
+        return res.send([]);
+      }
+      const filteredIssueList = docs.issues.filter(issue => {
+        for (let key in filteredParams) {
+          if (issue[key] !== filteredParams[key]) {
+            return false;
+          }
+          return true;
+        }
+      });
+      if (Array.isArray(filteredIssueList) && filteredIssueList.length) {
+        return res.send(filteredIssueList);
+      } else {
+        return res.send([]);
+      }
+    });
   },
   createIssue: (req, res) => {
     const {
