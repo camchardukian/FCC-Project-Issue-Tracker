@@ -29,7 +29,6 @@ const issueController = {
       params
     );
     const filteredParamsLength = Object.keys(filteredParams).length;
-
     await Project.findOne({ projectName }, (err, docs) => {
       const issueDocs = docs.issues;
       if (!filteredParamsLength) {
@@ -69,13 +68,16 @@ const issueController = {
     if (!issue_title || !issue_text || !created_by) {
       return res.json({ error: "required field(s) missing" });
     }
+    const currentTime = new Date();
     const issueToBeAdded = new Issue({
       issue_title,
       issue_text,
       created_by,
       assigned_to,
       status_text,
-      open: true
+      open: true,
+      created_on: currentTime,
+      updated_on: currentTime
     });
     Project.find({ projectName }, (err, docs) => {
       if (!docs.length) {
