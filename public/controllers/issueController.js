@@ -40,10 +40,20 @@ const issueController = {
       const filteredIssueList = docs.issues.filter(issue => {
         let innerLoopCount = 0;
         for (let key in filteredParams) {
-          if (issue[key] !== filteredParams[key]) {
-            innerLoopCount = 0;
-            return false;
-          } else if (innerLoopCount >= filteredParamsLength - 1) {
+          if (key === "_id") {
+            if (
+              JSON.stringify(issue[key]) !== JSON.stringify(filteredParams[key])
+            ) {
+              innerLoopCount = 0;
+              return false;
+            }
+          } else {
+            if (issue[key] !== filteredParams[key]) {
+              innerLoopCount = 0;
+              return false;
+            }
+          }
+          if (innerLoopCount >= filteredParamsLength - 1) {
             return true;
           }
           innerLoopCount += 1;
